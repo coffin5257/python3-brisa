@@ -18,10 +18,10 @@ def list_section(s, show_hidden=False):
     section_dict = config.manager.items(s)
 
     if not section_dict:
-        print 'Section %s does not exist' % s
+        print('Section %s does not exist' % s)
         return
 
-    print 'Section', s
+    print('Section', s)
 
     if not show_hidden:
         for k in section_dict.copy():
@@ -34,7 +34,7 @@ def list_section(s, show_hidden=False):
 
 def clean_config():
     os.remove(config.brisa_home + '/configurations.pickle')
-    print 'Configuration file deleted.'
+    print('Configuration file deleted.')
 
 
 def main():
@@ -79,18 +79,18 @@ def main():
     (options, args) = parser.parse_args()
 
     if options.version:
-        print 'brisa-conf 0.1.1'
-        print 'License MIT: Copyright (c) 2008-2009 BRisa Team'\
-              ' <http://www.opensource.org/licenses/mit-license.php>'
-        print 'Written by Andre Dieb Martins.'
+        print('brisa-conf 0.1.1')
+        print('License MIT: Copyright (c) 2008-2009 BRisa Team'\
+              ' <http://www.opensource.org/licenses/mit-license.php>')
+        print('Written by Andre Dieb Martins.')
         sys.exit()
 
     if options.list_sections:
-        print 'Listing sections\n'
+        print('Listing sections\n')
         for k in config.manager.get_section_names():
             if not options.names_only:
                 list_section(k, options.hidden)
-                print '\n'
+                print('\n')
         sys.exit()
 
     if options.clean_config:
@@ -103,19 +103,19 @@ def main():
 
     if options.section and options.parameter:
         if options.delete:
-            print 'Removing section %s' % options.section
+            print('Removing section %s' % options.section)
             config.manager.rem_section(options.section)
             sys.exit()
 
         value = ' '.join(args)
 
         if not value:
-            print 'Removing parameter %s from section %s' % \
-                (options.parameter, options.section)
+            print('Removing parameter %s from section %s' % \
+                (options.parameter, options.section))
             value = None
         else:
-            print 'Setting parameter %s in section %s to the value %s' % \
-            (options.parameter, options.section, value)
+            print('Setting parameter %s in section %s to the value %s' % \
+            (options.parameter, options.section, value))
 
         config.manager.set_parameter(options.section, options.parameter,
                                      value)
@@ -127,7 +127,7 @@ def main():
 
     if not options.parameter and options.section:
         if options.delete:
-            print 'Removing section %s' % options.section
+            print('Removing section %s' % options.section)
             config.manager.rem_section(options.section)
             sys.exit()
         parser.error('could not identify action on section')
