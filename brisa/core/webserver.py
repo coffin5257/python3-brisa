@@ -28,11 +28,9 @@ import email.generator
 import wsgiref.util
 import wsgiref.headers
 
-
 from brisa import __enable_webserver_logging__, __enable_offline_mode__
 from brisa.core import log, config, threaded_call
 from brisa.core.network import parse_url, get_active_ifaces, get_ip_address
-
 
 if not __enable_offline_mode__:
     if not get_active_ifaces():
@@ -75,7 +73,7 @@ http_codes = {100: 'Continue',
               504: 'Gateway Time-out',
               505: 'HTTP Version not supported'}
 
-chunks_size = 2**16
+chunks_size = 2 ** 16
 
 simple_template = '<html><head><title>%s</title><body>%s</body></html>'
 
@@ -104,7 +102,7 @@ def simple_response(code, start_response, extra_msg=None):
     start_response(status_msg, [('Content-type', 'text/html')])
     if extra_msg:
         return simple_template % (status_msg, '%s<br/>%s' % (status_msg, \
-                                  extra_msg))
+                                                             extra_msg))
     else:
         return simple_template % (status_msg, status_msg)
 
@@ -131,7 +129,6 @@ def response(code, start_response, msg):
     return msg
 
 
-
 class Request(object):
     """ Request wrapper class.
     """
@@ -147,7 +144,7 @@ class Request(object):
         self.body = env.get('wsgi.input', None)
         self.headers = wsgiref.headers.Headers([])
 
-        for k,v in list(env.items()):
+        for k, v in list(env.items()):
             if 'HTTP' in k:
                 key = k.replace('HTTP_', '').lower().replace('_', '-')
                 self.headers[key] = v
@@ -155,12 +152,10 @@ class Request(object):
         self.method = env['REQUEST_METHOD']
         self.server_protocol = env['SERVER_PROTOCOL']
         self.protocol = tuple(map(int, self.server_protocol[5:].split('.')))
-        self.headers['Content-length'] = env.get('CONTENT_LENGTH', 0)
+        self.headers['Content-length'] = env.get('CONTENT_LENGTH', '0')
 
         if not self.headers['Content-length']:
             del self.headers['Content-length']
-        else:
-            self.headers['Content-length'] = int(self.headers['Content-length'])
 
         self.headers['Content-type'] = env.get('CONTENT_TYPE', '')
         self.query = env['QUERY_STRING']
@@ -168,7 +163,7 @@ class Request(object):
 
         if self.query:
             self.params = dict([(lambda k: k.split('='))(v) for v in \
-                                 self.query.split('&')])
+                                self.query.split('&')])
         else:
             self.params = {}
 
@@ -178,8 +173,8 @@ class Request(object):
         if 'Content-length' in self.headers and self.body:
             return self.body.read(self.headers['Content-length'])
         else:
-            raise RuntimeError('Header does not contain a content-'\
-                               'length field. It is possible that this'\
+            raise RuntimeError('Header does not contain a content-' \
+                               'length field. It is possible that this' \
                                ' request does not contain a payload.')
 
 
@@ -233,7 +228,7 @@ def get_byte_ranges(r, clen):
 
     if bunit != 'bytes':
         # Ignore any other kind of units
-        log.warning('Received a request with wrong Range header (unit is not'\
+        log.warning('Received a request with wrong Range header (unit is not' \
                     'bytes')
         return None
 
@@ -265,7 +260,6 @@ def get_byte_ranges(r, clen):
                 return None
             ranges.append((int(start), int(stop) + 1))
             log.debug('Ranges: %s' % ranges)
-
 
     log.debug('Ranges: %s' % ranges)
     return ranges
@@ -317,7 +311,7 @@ def setup_multi_part_response(r, rngs, clen, content_type):
     @param clen: length of the body file
     """
     b = email.generator._make_boundary()
-    r.headers['Content-type'] = 'multipart/byteranges;'\
+    r.headers['Content-type'] = 'multipart/byteranges;' \
                                 'boundary=%s' % b
 
     real_file = r.body
@@ -331,7 +325,7 @@ def setup_multi_part_response(r, rngs, clen, content_type):
             yield 'Content-range: bytes\r\n%s-%s/%s\r\n\r\n' % \
                   (start, stop - 1, clen)
             real_file.seek(start)
-            for c in chunk_generator(real_file, chunks_size, stop-start):
+            for c in chunk_generator(real_file, chunks_size, stop - start):
                 yield c
             yield '\r\n'
         yield '--%s--\r\n' % b
@@ -692,6 +686,7 @@ def client_host(server_host):
 
     return server_host
 
+
 def check_port(host, port, timeout=1.0):
     """ Raises an error if the given port is not free on the given host.
 
@@ -794,7 +789,7 @@ class WebServer(Resource):
                 self.adapter = pref()
 
         if not self.adapter:
-            log.critical('Could not select a adapter. Check the supported '\
+            log.critical('Could not select a adapter. Check the supported ' \
                          'adapters and install one of them on your system.')
             raise SystemExit
 
